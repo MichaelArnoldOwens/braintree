@@ -39,6 +39,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', routes);
 app.use('/users', users);
 
+
+
 //Braintree - generate client token
 //TODO: pass key directly to page instead of making ajax request
 app.get("/client_token", function(req,res) {
@@ -55,14 +57,15 @@ app.post("/checkout", function (req, res) {
   var nonce = req.body.payment_method_nonce;
   
   // Use payment method nonce here
-  var nonceFromTheClient = 'fake-valid-amex-nonce';
+  var nonceFromTheClient = 'fake-valid-mastercard-nonce';
 
   gateway.transaction.sale({
-    amount: '10.00',
+    amount: '100.00',
     paymentMethodNonce: nonceFromTheClient,
   }, function (err, result) {
     console.log('checkout success')
   });
+  res.redirect("/");
 });
 
 
