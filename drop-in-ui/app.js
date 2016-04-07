@@ -4,6 +4,13 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var crypto = require('crypto')
+  , text = 'I love cupcakes'
+  , key = 'testKey'
+  , hash;
+
+  hash = crypto.createHmac('sha1', key).update(text).digest('hex')
+  console.log(hash);
 
 
 // Braintree - configure BEGIN
@@ -52,19 +59,64 @@ app.get("/client_token", function(req,res) {
 //Braintree - receive payment method nonce from client
 app.post("/checkout", function (req, res) {
   console.log(req.body);
-  
+
   console.log('######');
+
+  // console.log('checkout success, here is what was stored:');
+  // console.log('firstName=' + req.body.firstName);
+  // console.log('lastName=' + req.body.lastName);
+  // console.log('postalCode=' + req.body.zip);
+  // console.log('streetAddress=' + req.body.address);
+  // console.log('locality=' + req.body.city);
+  // console.log('countryName=' + req.body.country);
+  // console.log('email=' + req.body.email);
+  // console.log('$$$$$$$$$$$$$$$$');
   var nonce = req.body.payment_method_nonce;
   
   // Use payment method nonce here
-  var nonceFromTheClient = 'fake-valid-amex-nonce';
+  var nonceFromTheClient = 'fake-valid-mastercard-nonce';
+
+
+  // customer create with payment method on success response will have customer id => transaction sale
 
   gateway.transaction.sale({
-    amount: '10.00',
+    amount: '0.01',
     paymentMethodNonce: nonceFromTheClient,
+    customer: {
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      company: req.body.company,
+      phone: req.body.phone,
+      email: req.body.email
+    },
+    billing: {
+      firstName: req.body.firstname,
+      lastName: req.body.lastName,
+      company: req.body.company,
+      streetAddress: req.body.address,
+      locality: req.body.city,
+      region: req.body.state,
+      postalCode: req.body.zip,
+      countryName: req.body.country
+    },
+    options: {
+      storeInVaultOnSuccess: true,
+      addBillingAddressToPaymentMethod: true
+    }
   }, function (err, result) {
-    console.log('checkout success')
+    console.log('checkout success, here is what was stored:');
+    console.log('firstName=' + req.body.firstName);
+    console.log('lastName=' + req.body.lastName);
+    console.log('postalCode=' + req.body.zip);
+    console.log('streetAddress=' + req.body.address);
+    console.log('locality=' + req.body.city);
+    console.log('countryName=' + req.body.country);
+    console.log('email=' + req.body.email);
+    console.log('$$$$$$$$$$$$$$$$');
   });
+
+  //redirect to employer landing
+  res.redirect("/");
 });
 
 
